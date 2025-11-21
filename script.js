@@ -70,8 +70,43 @@ form?.addEventListener('submit', event => {
   renderRoutes(preference === 'Accessible route' ? 'accessible' : 'fastest');
 });
 
+function setOriginValue(value) {
+  if (!originInput) return;
+  originInput.value = value;
+}
+
+function toggleLocationButton(disabled, label) {
+  if (!useLocationButton) return;
+  useLocationButton.disabled = disabled;
+  useLocationButton.textContent = label;
+}
+
+function handleLocationError(error) {
+  const fallbackMessage = 'Unable to fetch your location';
+  const errorLabel = error?.message ? `${fallbackMessage}: ${error.message}` : fallbackMessage;
+  setOriginValue(errorLabel);
+  toggleLocationButton(false, 'Use location');
+}
+
 useLocationButton?.addEventListener('click', () => {
-  originInput.value = 'Using current location…';
+  if (!navigator?.geolocation) {
+    setOriginValue('Geolocation is not supported in this browser');
+    return;
+  }
+
+  toggleLocationButton(true, 'Detecting…');
+  setOriginValue('Detecting current location…');
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      const { latitude, longitude } = position.coords;
+      const formatted = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+      setOriginValue(formatted);
+      toggleLocationButton(false, 'Use location');
+    },
+    handleLocationError,
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
 });
 
 // Render initial mock data
