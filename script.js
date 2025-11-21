@@ -11,6 +11,7 @@ const SpeechRecognition =
   typeof window !== 'undefined' &&
   (window.SpeechRecognition || window.webkitSpeechRecognition);
 let recognition;
+let isRecognitionActive = false;
 let listeningTarget = null;
 
 // Mock route states to demonstrate UI switching without real data yet.
@@ -106,16 +107,69 @@ function resetVoiceState() {
   listeningTarget = null;
 }
 
-function startListening(targetName, button) {
-  if (!recognition) return;
+function stopRecognition() {
+  if (recognition && isRecognitionActive) {
+    recognition.stop();
+  }
+  recognition = null;
+  isRecognitionActive = false;
+}
 
+function createRecognition() {
+  if (!SpeechRecognition) return null;
+
+  const instance = new SpeechRecognition();
+  instance.continuous = false;
+  instance.interimResults = false;
+  instance.lang = 'en-US';
+
+  instance.addEventListener('start', () => {
+    isRecognitionActive = true;
+  });
+
+  instance.addEventListener('result', event => {
+    const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+    if (transcript && listeningTarget?.input) {
+      listeningTarget.input.value = transcript;
+      listeningTarget.input.focus();
+    }
+  });
+
+  instance.addEventListener('error', event => {
+    if (listeningTarget?.input) {
+      const message =
+        event.error === 'not-allowed'
+          ? 'Microphone access blocked. Allow access to dictate.'
+          : `Voice input error: ${event.error}`;
+      listeningTarget.input.value = message;
+    }
+    resetVoiceState();
+    stopRecognition();
+  });
+
+  instance.addEventListener('end', () => {
+    resetVoiceState();
+    stopRecognition();
+  });
+
+  return instance;
+}
+
+function startListening(targetName, button) {
   const input = getInputForTarget(targetName);
   if (!input) return;
 
-  if (listeningTarget) {
-    recognition.stop();
-    resetVoiceState();
+  if (!SpeechRecognition) {
+    input.value = 'Voice input not supported in this browser';
+    return;
   }
+
+  if (isRecognitionActive) {
+    stopRecognition();
+  }
+
+  recognition = createRecognition();
+  if (!recognition) return;
 
   listeningTarget = { input, button, targetName };
   setVoiceButtonActive(button, true);
@@ -137,7 +191,7 @@ voiceButtons.forEach(button => {
     if (!target) return;
 
     if (listeningTarget?.button === button) {
-      recognition?.stop();
+      stopRecognition();
       resetVoiceState();
       return;
     }
@@ -184,32 +238,6 @@ useLocationButton?.addEventListener('click', () => {
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
   );
 });
-
-if (SpeechRecognition) {
-  recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = 'en-US';
-
-  recognition.addEventListener('result', event => {
-    const transcript = event.results?.[0]?.[0]?.transcript?.trim();
-    if (transcript && listeningTarget?.input) {
-      listeningTarget.input.value = transcript;
-      listeningTarget.input.focus();
-    }
-  });
-
-  recognition.addEventListener('error', event => {
-    if (listeningTarget?.input) {
-      listeningTarget.input.value = `Voice input error: ${event.error}`;
-    }
-    resetVoiceState();
-  });
-
-  recognition.addEventListener('end', () => {
-    resetVoiceState();
-  });
-}
 
 // Render initial mock data
 renderRoutes('fastest');
