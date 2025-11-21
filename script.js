@@ -5,6 +5,13 @@ const destinationInput = document.getElementById('destination');
 const preferenceSelect = document.getElementById('preference');
 const results = document.querySelector('.results');
 const clearButton = document.querySelector('.ghost-button');
+const voiceButtons = document.querySelectorAll('.voice-button');
+
+const SpeechRecognition =
+  typeof window !== 'undefined' &&
+  (window.SpeechRecognition || window.webkitSpeechRecognition);
+let recognition;
+let listeningTarget = null;
 
 // Mock route states to demonstrate UI switching without real data yet.
 const mockRoutes = {
@@ -79,6 +86,66 @@ clearButton?.addEventListener('click', () => {
   renderRoutes('fastest');
 });
 
+function setVoiceButtonActive(button, isActive) {
+  if (!button) return;
+  button.classList.toggle('active', isActive);
+  button.setAttribute('aria-pressed', String(isActive));
+  button.title = isActive ? 'Listening…' : 'Start voice input';
+}
+
+function getInputForTarget(target) {
+  if (target === 'origin') return originInput;
+  if (target === 'destination') return destinationInput;
+  return null;
+}
+
+function resetVoiceState() {
+  if (listeningTarget?.button) {
+    setVoiceButtonActive(listeningTarget.button, false);
+  }
+  listeningTarget = null;
+}
+
+function startListening(targetName, button) {
+  if (!recognition) return;
+
+  const input = getInputForTarget(targetName);
+  if (!input) return;
+
+  if (listeningTarget) {
+    recognition.stop();
+    resetVoiceState();
+  }
+
+  listeningTarget = { input, button, targetName };
+  setVoiceButtonActive(button, true);
+  input.focus();
+  recognition.start();
+}
+
+voiceButtons.forEach(button => {
+  button.title = 'Start voice input';
+
+  if (!SpeechRecognition) {
+    button.disabled = true;
+    button.title = 'Voice input not supported in this browser';
+    return;
+  }
+
+  button.addEventListener('click', () => {
+    const target = button.getAttribute('data-target');
+    if (!target) return;
+
+    if (listeningTarget?.button === button) {
+      recognition?.stop();
+      resetVoiceState();
+      return;
+    }
+
+    startListening(target, button);
+  });
+});
+
 function setOriginValue(value) {
   if (!originInput) return;
   originInput.value = value;
@@ -117,6 +184,32 @@ useLocationButton?.addEventListener('click', () => {
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
   );
 });
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  recognition.addEventListener('result', event => {
+    const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+    if (transcript && listeningTarget?.input) {
+      listeningTarget.input.value = transcript;
+      listeningTarget.input.focus();
+    }
+  });
+
+  recognition.addEventListener('error', event => {
+    if (listeningTarget?.input) {
+      listeningTarget.input.value = `Voice input error: ${event.error}`;
+    }
+    resetVoiceState();
+  });
+
+  recognition.addEventListener('end', () => {
+    resetVoiceState();
+  });
+}
 
 // Render initial mock data
 renderRoutes('fastest');

@@ -32,13 +32,23 @@
           <label for="origin">From</label>
           <div class="input-row">
             <input id="origin" name="origin" type="text" placeholder="Current location or station" autocomplete="off" value="Current location">
+            <button type="button" class="voice-button" data-target="origin" aria-label="Speak origin">
+              <span aria-hidden="true">🎙️</span>
+              <span class="sr-only">Speak origin</span>
+            </button>
             <button type="button" class="pill-button" id="use-location">Use location</button>
           </div>
         </div>
 
         <div class="input-stack">
           <label for="destination">To</label>
-          <input id="destination" name="destination" type="text" placeholder="e.g. Warschauer Straße" autocomplete="off">
+          <div class="input-row">
+            <input id="destination" name="destination" type="text" placeholder="e.g. Warschauer Straße" autocomplete="off">
+            <button type="button" class="voice-button" data-target="destination" aria-label="Speak destination">
+              <span aria-hidden="true">🎙️</span>
+              <span class="sr-only">Speak destination</span>
+            </button>
+          </div>
         </div>
 
         <div class="compact-grid">
