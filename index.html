@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berlin Transit Navigator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-logo" aria-hidden="true">🚉</span>
+      <div>
+        <div class="brand-title">Berlin Transit Navigator</div>
+        <div class="brand-subtitle">BVG + S-Bahn live journeys</div>
+      </div>
+    </div>
+    <nav class="nav-actions" aria-label="Primary">
+      <button class="ghost-button">Service alerts</button>
+      <button class="ghost-button">Accessibility</button>
+      <button class="primary-button">Start navigating</button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Journey builder</p>
+          <h1>Real-time routes across Berlin</h1>
+          <p class="lede">Use your current location to find the fastest connection, see live departures, and follow turn-by-turn walking instructions.</p>
+        </div>
+        <div class="badge">Live data</div>
+      </div>
+
+      <form class="form" aria-label="Journey search">
+        <div class="form-group inline">
+          <label for="origin">From</label>
+          <div class="input-with-action">
+            <input id="origin" name="origin" type="text" placeholder="Current location or station" autocomplete="off" value="Current location">
+            <button type="button" class="ghost-button" id="use-location">Use location</button>
+          </div>
+        </div>
+
+        <div class="form-group inline">
+          <label for="destination">To</label>
+          <input id="destination" name="destination" type="text" placeholder="e.g. Warschauer Straße" autocomplete="off">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="travel-time">When</label>
+            <select id="travel-time" name="travel-time">
+              <option>Leave now</option>
+              <option>Depart at…</option>
+              <option>Arrive by…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="preference">Preference</label>
+            <select id="preference" name="preference">
+              <option>Fastest</option>
+              <option>Fewest transfers</option>
+              <option>Accessible route</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="alerts">Disruptions</label>
+            <div class="toggle">
+              <input type="checkbox" id="alerts" name="alerts" checked>
+              <label for="alerts">Show planned works</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="primary-button">Search routes</button>
+          <button type="button" class="ghost-button">Save home/work</button>
+        </div>
+      </form>
+
+      <div class="results" aria-live="polite">
+        <div class="result-card">
+          <div>
+            <p class="eyebrow">Fastest · 24 min</p>
+            <h3>Alexanderplatz → Warschauer Straße</h3>
+            <ul class="steps">
+              <li>Walk 5 min to S+U Alexanderplatz</li>
+              <li>S5 towards Strausberg Nord · Track 2 · arrives in 3 min</li>
+              <li>Get off at Warschauer Straße · Exit towards East Side Gallery</li>
+            </ul>
+          </div>
+          <div class="times">
+            <span class="pill">Departs 14:03</span>
+            <span class="pill live">Live</span>
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div>
+            <p class="eyebrow">Fewest transfers · 27 min</p>
+            <h3>Alexanderplatz → Warschauer Straße</h3>
+            <ul class="steps">
+              <li>Walk 2 min to U Alexanderplatz (U1)</li>
+              <li>U1 towards Warschauer Straße · arrives in 5 min</li>
+              <li>Stay on to final stop · Exit towards footbridge</li>
+            </ul>
+          </div>
+          <div class="times">
+            <span class="pill">Departs 14:05</span>
+            <span class="pill">Platform B</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="map-panel" aria-label="Interactive map">
+      <div class="map-header">
+        <p class="eyebrow">Map</p>
+        <div class="map-actions">
+          <button class="ghost-button">Recenter to me</button>
+          <button class="ghost-button">Layers</button>
+        </div>
+      </div>
+      <div class="map-placeholder" role="img" aria-label="Map placeholder showing Berlin U-Bahn and S-Bahn lines">
+        <div class="grid"></div>
+        <div class="map-legend">
+          <span class="legend-dot ubahn"></span> U-Bahn
+          <span class="legend-dot sbahn"></span> S-Bahn
+          <span class="legend-dot walking"></span> Walking
+        </div>
+        <div class="map-note">Live stations, disruptions, and walking paths will appear here.</div>
+      </div>
+
+      <div class="live-board">
+        <div class="live-board-header">
+          <div>
+            <p class="eyebrow">Nearby departures</p>
+            <h3>S+U Alexanderplatz</h3>
+          </div>
+          <button class="ghost-button">Refresh</button>
+        </div>
+        <div class="departures">
+          <div class="departure-row">
+            <span class="line-badge sbahn">S5</span>
+            <span class="line-destination">Strausberg Nord</span>
+            <span class="line-track">Gleis 2</span>
+            <span class="line-time live">3 min</span>
+          </div>
+          <div class="departure-row">
+            <span class="line-badge ubahn">U2</span>
+            <span class="line-destination">Pankow</span>
+            <span class="line-track">Bahnsteig B</span>
+            <span class="line-time">6 min</span>
+          </div>
+          <div class="departure-row disrupted">
+            <span class="line-badge tram">M4</span>
+            <span class="line-destination">Hackescher Markt</span>
+            <span class="line-track">Tram</span>
+            <span class="line-time">Delayed</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <h4>Designed for Berlin riders</h4>
+      <p>Built to combine BVG and S-Bahn data for reliable journey planning, accessibility-aware routes, and live station boards.</p>
+    </div>
+    <div class="footer-actions">
+      <button class="primary-button">Try a sample route</button>
+      <button class="ghost-button">View API status</button>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
