@@ -87,6 +87,10 @@ p { margin: 0; }
   align-items: center;
 }
 
+.input-row:has(.voice-button):has(.pill-button) {
+  grid-template-columns: 1fr auto auto;
+}
+
 input,
 select {
   width: 100%;
@@ -122,6 +126,32 @@ select { appearance: none; }
 
 .ghost-button {
   background: transparent;
+}
+
+.voice-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #0b1324;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.voice-button.active {
+  background: rgba(59, 130, 246, 0.16);
+  border-color: rgba(59, 130, 246, 0.6);
+  transform: scale(0.98);
+}
+
+.voice-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .actions {
@@ -197,4 +227,15 @@ select { appearance: none; }
   .actions { flex-direction: column; }
   .result-card { flex-direction: column; }
   .times { align-items: flex-start; }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
