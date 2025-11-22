@@ -3,6 +3,7 @@ const useLocationButton = document.getElementById('use-location');
 const originInput = document.getElementById('origin');
 const destinationInput = document.getElementById('destination');
 const preferenceSelect = document.getElementById('preference');
+const languageSelect = document.getElementById('dictation-language');
 const results = document.querySelector('.results');
 const clearButton = document.querySelector('.ghost-button');
 const voiceButtons = document.querySelectorAll('.voice-button');
@@ -91,7 +92,32 @@ function setVoiceButtonActive(button, isActive) {
   if (!button) return;
   button.classList.toggle('active', isActive);
   button.setAttribute('aria-pressed', String(isActive));
-  button.title = isActive ? 'Listening…' : 'Start voice input';
+  button.title = isActive
+    ? 'Listening…'
+    : `Start voice input (${describeRecognitionLanguage()})`;
+}
+
+function resolveRecognitionLanguage() {
+  const selected = languageSelect?.value;
+  if (selected && selected !== 'auto') return selected;
+
+  const browserLanguage = navigator?.language?.toLowerCase() || '';
+  if (browserLanguage.startsWith('de')) return 'de-DE';
+  return 'en-US';
+}
+
+function describeRecognitionLanguage() {
+  const resolved = resolveRecognitionLanguage();
+  const label = resolved.startsWith('de') ? 'Deutsch' : 'English';
+  return languageSelect?.value === 'auto' ? `Auto (${label})` : label;
+}
+
+function updateVoiceButtonTitles() {
+  if (!SpeechRecognition) return;
+  const label = describeRecognitionLanguage();
+  voiceButtons.forEach(button => {
+    button.title = `Start voice input (${label})`;
+  });
 }
 
 function getInputForTarget(target) {
@@ -121,7 +147,7 @@ function createRecognition() {
   const instance = new SpeechRecognition();
   instance.continuous = false;
   instance.interimResults = false;
-  instance.lang = 'en-US';
+  instance.lang = resolveRecognitionLanguage();
 
   instance.addEventListener('start', () => {
     isRecognitionActive = true;
@@ -178,13 +204,13 @@ function startListening(targetName, button) {
 }
 
 voiceButtons.forEach(button => {
-  button.title = 'Start voice input';
-
   if (!SpeechRecognition) {
     button.disabled = true;
     button.title = 'Voice input not supported in this browser';
     return;
   }
+
+  button.title = `Start voice input (${describeRecognitionLanguage()})`;
 
   button.addEventListener('click', () => {
     const target = button.getAttribute('data-target');
@@ -198,6 +224,14 @@ voiceButtons.forEach(button => {
 
     startListening(target, button);
   });
+});
+
+languageSelect?.addEventListener('change', () => {
+  updateVoiceButtonTitles();
+  if (isRecognitionActive) {
+    stopRecognition();
+    resetVoiceState();
+  }
 });
 
 function setOriginValue(value) {
